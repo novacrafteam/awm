@@ -35,7 +35,7 @@ def fetch_kml() -> bytes:
         data = open(local, "rb").read()
     else:
         mid = os.environ["MAP_ID"]
-        url = f"https://www.google.com/maps/d/kml?mid={mid}&forcekml=1"
+        url = f"https://www.google.com/maps/d/kml?mid=12f-mXoGL3b07piqSeRr0-HiRO5mNvkY&forcekml=1"
         req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (map-snapshot)"})
         data = urllib.request.urlopen(req, timeout=90).read()
     if data[:2] == b"PK":                       # KMZ → дістаємо doc.kml
