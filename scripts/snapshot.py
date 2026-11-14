@@ -8,7 +8,7 @@
      змін було кілька, лишається останній стан дня) і оновлює history/index.json.
   4. Завжди оновлює history/latest.kml.gz — свіжа копія для сайту.
 """
-import gzip, hashlib, io, json, os, re, sys, urllib.request, zipfile
+import gzip, hashlib, io, json, os, re, sys, time, urllib.parse, urllib.request, zipfile
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -29,20 +29,72 @@ def canon_hash(kml: bytes) -> str:
     return hashlib.sha256("\n".join(norm).encode("utf-8")).hexdigest()
 
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                  "Chrome/126.0.0.0 Safari/537.36",
+    "Accept": "application/vnd.google-earth.kml+xml,application/xml,text/xml,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Referer": "https://www.google.com/maps/d/viewer",
+}
+
+
+def download(url: str, tries: int = 2) -> bytes:
+    """Одне завантаження з кількома спробами; кидає виняток, якщо не вийшло."""
+    last = None
+    for i in range(tries):
+        try:
+            req = urllib.request.Request(url, headers=HEADERS)
+            return urllib.request.urlopen(req, timeout=90).read()
+        except Exception as e:                  # 403/429/5xx/таймаут
+            last = e
+            time.sleep(3 * (i + 1))
+    raise last
+
+
+def looks_like_kml(data: bytes) -> bool:
+    if data[:2] == b"PK":
+        return True
+    return b"<kml" in data and b"<Placemark" in data
+
+
 def fetch_kml() -> bytes:
     local = os.environ.get("KML_FILE")          # для перевірки без інтернету
     if local:
         data = open(local, "rb").read()
     else:
-        mid = os.environ["MAP_ID"]
-        url = f"https://www.google.com/maps/d/kml?mid=12f-mXoGL3b07piqSeRr0-HiRO5mNvkY&forcekml=1"
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (map-snapshot)"})
-        data = urllib.request.urlopen(req, timeout=90).read()
+        mid = urllib.parse.quote(os.environ["MAP_ID"], safe="")
+        u1 = f"https://www.google.com/maps/d/kml?mid={mid}&forcekml=1"
+        u2 = f"https://www.google.com/maps/d/u/0/kml?mid={mid}&forcekml=1"
+        # Google часто віддає 403 IP-адресам GitHub-серверів, тому далі йдуть запасні шляхи через проксі
+        # (вони ходять до Google зі своїх адрес). Той самий підхід використовує й сам сайт.
+        candidates = [
+            u1, u2,
+            "https://corsproxy.io/?url=" + urllib.parse.quote(u1, safe=""),
+            "https://api.allorigins.win/raw?url=" + urllib.parse.quote(u1, safe=""),
+            "https://corsproxy.io/?url=" + urllib.parse.quote(u2, safe=""),
+        ]
+        data, errors = None, []
+        for url in candidates:
+            try:
+                d = download(url)
+            except Exception as e:
+                errors.append(f"{url.split('?')[0]} -> {e}")
+                print("Не вийшло:", errors[-1], file=sys.stderr)
+                continue
+            if looks_like_kml(d):
+                data = d
+                print("Карту отримано через:", url.split("?")[0])
+                break
+            errors.append(f"{url.split('?')[0]} -> відповідь не схожа на KML")
+            print("Не вийшло:", errors[-1], file=sys.stderr)
+        if data is None:
+            raise SystemExit("Не вдалося завантажити карту жодним способом:\n  " + "\n  ".join(errors)
+                             + "\nПеревір, що карта відкрита для перегляду за посиланням.")
     if data[:2] == b"PK":                       # KMZ → дістаємо doc.kml
         z = zipfile.ZipFile(io.BytesIO(data))
         name = next(n for n in z.namelist() if n.lower().endswith(".kml"))
         data = z.read(name)
-    if b"<kml" not in data[:3000] and b"<kml" not in data:
+    if b"<kml" not in data:
         raise SystemExit("Відповідь не схожа на KML — знімок не збережено (карта закрита для перегляду?).")
     return data
 
