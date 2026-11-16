@@ -201,7 +201,7 @@
   body.full .lay-wrap, body.full #layPanel { display: none !important; }
 
   /* ======== Календар: щоденний архів стану карти ======== */
-  #calPanel { display: none; position: fixed; left: 10px; top: 72px; width: min(340px, calc(100vw - 20px)); max-height: calc(100vh - 170px); overflow-y: auto; z-index: 1300;
+  #calPanel { display: none; position: fixed; left: 10px; top: 76px; width: min(340px, calc(100vw - 20px)); max-height: calc(100vh - 150px); overflow-y: auto; z-index: 1300;
               background: #fff; border-radius: 14px; box-shadow: 0 2px 14px rgba(0,0,0,.4); padding: 10px 12px 12px; color: var(--ink); }
   #calPanel.open { display: block; }
   #calPanel .ch { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
@@ -222,15 +222,30 @@
   #calPanel .cl { display: flex; gap: 6px; margin-top: 6px; }
   #calPanel .cl button { flex: 1; height: 36px; border: 0; background: #f1f1f1; border-radius: 8px; font: inherit; font-size: 13px; color: var(--ink); cursor: pointer; padding: 0 4px; touch-action: manipulation; }
   #calPanel .cf { margin-top: 8px; font-size: 12px; color: var(--muted); text-align: center; line-height: 1.4; }
-  #calBadge { display: none; position: absolute; top: 10px; left: calc(50% + 20px); transform: translateX(-50%); z-index: 1100; align-items: center; gap: 8px;
-              background: #e8590c; color: #fff; border-radius: 12px; padding: 5px 5px 5px 11px; box-shadow: 0 2px 10px rgba(0,0,0,.35); white-space: nowrap; }
-  #calBadge small { display: block; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; opacity: .92; line-height: 1.1; }
-  #calBadge b { display: block; font-size: 14px; line-height: 1.25; }
-  #calBadge button { border: 0; background: #fff; color: #c2410c; border-radius: 8px; height: 34px; padding: 0 11px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; touch-action: manipulation; }
+  #calBar { position: absolute; top: 10px; left: 112px; right: 72px; z-index: 1000; display: flex; justify-content: center; pointer-events: none; }
+  #calBar .pill { pointer-events: auto; display: flex; align-items: stretch; height: 56px; background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.3); overflow: hidden; color: var(--ink); }
+  #calBar button { border: 0; background: transparent; cursor: pointer; color: inherit; font: inherit; padding: 0; touch-action: manipulation; }
+  #calBar .ar { width: 36px; font-size: 26px; line-height: 1; }
+  #calBar .ar:disabled { opacity: .28; cursor: default; }
+  #calBar .mid { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 88px; padding: 0 6px; border-left: 1px solid #eee; border-right: 1px solid #eee; text-align: left; }
+  #calBar .mid svg { width: 20px; height: 20px; flex: none; display: block; }
+  #calBar .mid span { display: block; line-height: 1.15; }
+  #calBar .mid small { display: block; font-size: 10px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+  #calBar .mid b { display: block; font-size: 15px; }
+  #calBar .mid.on { box-shadow: inset 0 -3px 0 #e8590c; }
+  #calBar.arch .pill { background: #e8590c; color: #fff; }
+  #calBar.arch .mid { border-color: rgba(255,255,255,.35); }
+  #calBar.arch .mid small { color: #fff; opacity: .92; }
+  #calBar.arch .mid.on { box-shadow: inset 0 -3px 0 #fff; }
+  body.full #calBar { display: none !important; }
   body.full #calPanel { display: none !important; }
   @media (min-width: 640px) and (orientation: landscape), (min-width: 900px) {
-    #calPanel { left: calc(92px + env(safe-area-inset-left, 0px)); top: 86px; max-height: calc(100vh - 110px); }
-    #calBadge { top: 66px; left: 50%; }
+    #calBar { left: auto; right: calc(72px + env(safe-area-inset-right, 0px)); justify-content: flex-end; }
+    #calPanel { left: auto; right: calc(10px + env(safe-area-inset-right, 0px)); top: 76px; max-height: calc(100vh - 100px); }
+  }
+  @media (min-width: 640px) and (orientation: landscape) and (max-height: 520px) {
+    #calBar .pill { height: 46px; }
+    #calPanel { top: 66px; }
   }
 </style>
 </head>
@@ -257,7 +272,11 @@
 
 <div id="layPanel"></div>
 <div id="calPanel"></div>
-<div id="calBadge"><div><small id="calBadgeK"></small><b id="calBadgeD"></b></div><button id="calBadgeLive" type="button"></button></div>
+<div id="calBar"><div class="pill">
+  <button id="calPrev" class="ar" type="button" aria-label="‹">‹</button>
+  <button id="calBtn" class="mid" type="button" aria-haspopup="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span><small id="calCap"></small><b id="calDate"></b></span></button>
+  <button id="calNext" class="ar" type="button" aria-label="›">›</button>
+</div></div>
 <input type="file" id="calFile" accept="application/json,.json" hidden>
 
 <div id="dock">
@@ -305,7 +324,6 @@
       <button id="bLine" title="Лінія" aria-label="Лінія"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAFRUlEQVR42u2dv0vzXBTHz725Ka0OdvTdOr6jCIKgw4OzOGj9Va22f4KjiIN/h84OUkQ6iVDe4uJSEIvDMzo+Y5eSNrm59x0eb4na1iSmza9zIEOKUfh8vvfkpkIOkVIClrsSQuQppZ3X11d5d3cHuq6DEMLz7yGEgG3bsLa2BgyxehfQarXg/Pz8x7/v4uICBfgpXddB0zSglIJt256vp5SClBIymQwK8FNSygF4Py1IXSelRAFBFqUUKKVDYY8ShQKCvUd4XhEoIKDkCyFgeXkZNjY2wLKswWe6rkOj0YBGozH4DAVMSMDq6iqcnp6SLylnTKKAKZRhGMA5L9i2Pa9p2h/OeYEx9tbtdrEFTWslMMbeCCE9TdP+vKf/bdiNGQVMaHvKOS8IIfIAALZtz3+3VUUBAVY2mwXG2Js6V6tgZmYGBQSY8uznRKvzh4cHME1Tcs6BEAJCCMhkMvD09DTyoQ0FeIRPCOnlcrmhAtrtNrTb7bHPCSjA/0NWXtf136ZpLtzc3Ax6Pj4JTwk+pbRjmuZCtVp9rtVqgxaDT8JThn99fQ2apn34FpRSCoQQT9tVQggQQlBAEPC9pl5d3+/3UcBP4Kvz7e1t2NraAs45jHvo+ixhcXHx740Ej4+Hbdt5KSX0+/2F/f19CQBS0zQJAINDnZdKJWma5r9+/xYCHwO/VCqNhX9wcCD7/f6ClBIsyypwzufdHpZlFWzbziN0n8l3wlfX4QqIGXwUEDJ8FBAy/NQLCBt+qgV4ha+2mkHCT62AqMBPpQAn/L29vbHwDw8PJwo/dQKiBj9VAqIIPzUCogo/FQKiDD/xAqIOP9ECFMRer7ccVfiJFRCH5CdWQFySn0gBTvi7u7uRh58oAXFLfqIExKnnJ05AHNtOYgR4gV8ulyMHP9YCnG0nrvBjK8Br8i3LKkQRfiwFJKHtxFZAkpIfOwFJhB8bAUmFHwsBTvg7OzuJgh95AV7gHx0dxQ5+pAX4hS+EyMZpY4HJRwHphR85AWmDHykBTvjb29upgB8ZAQqiYRi/0pL8yAjwm/y47XYiKWAYfMZYKpIfugBn23GbfCFENknwQxPgB37Skh+agGHwR7Wd4+PjxCY/FAFekp8G+FMV4Ad+UtvO1AUg/BAF+O35SdnnhyoAe36IArDthCjACb9YLLpOflrazkQFeIXPOZ9PW9uZmIBh8EfdcCuVSip7/sQEeIWf9uQHKsBL20H4AQvA5IcoAJMfogCEH8xBbNvOq4EDbooQ0lMvsu71er/K5fJ/tVoNGGPAOf/yUtNKpQJXV1f/UEo76np8LeynqQ9+DjfJr1armPzvVsDz87NstVqgadrfnuRCGGMMbm9voV6vj3ydb7VahcvLS0z+d3V2dvYhvV4OSum3yU/j1wteDpbL5UDTtC9JdrMSnG8NH5Z8KWVWrQCsEfMDhBAD8H4mg763l6FtB+H/YICD23Ec6v35pVIJkx+kALfjONTkiGKxCM7pcYjWpwDnXMSVlRWwLAsIISClBF3X4f7+Hl5eXr5MjjAMA+T7lCHEGoCAzc1NODk5+TIYpd/vy2EC3ueiIPygWlC32wXOeUG1FDWg0jAMpDatm7Dq5c4BlW5npGAFcBNWK+B9izovh4zxw5qQgNnZWWCMvTlXAQDA5zF+WAELUAmv1+vQ6XSkaZpAKR3sgh4fHz/8HNaEBDSbTWg2mzCuRWFF4EkYK+QnYawfCiCEDNLu5v8Bw1aKlNLTMEsshwDTNH+UdnWdZVlI04+A9fV1mJubA8aYrxVACAHOOSwtLakV0UGs7ut/q5KNRlCtym0AAAAASUVORK5CYII=" alt=""></button>
       <button id="bArea" title="Площа" aria-label="Площа"><img src="data:image/png;base64,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" alt=""></button>
       <button id="bPen" title="Малювати" aria-label="Малювати"><svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4.2-1L18 9.2a2.2 2.2 0 000-3.1l-.1-.1a2.2 2.2 0 00-3.1 0L5 15.8 4 20z"/><path d="M13.5 6.5l4 4"/></svg></button>
-      <button id="bCal" title="Календар" aria-label="Календар"><svg viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></button>
     </div>
   </div>
   <div id="search">
@@ -1477,7 +1495,7 @@ L.DomEvent.disableScrollPropagation(resEl);
 
 
 
-function closePanels() { $("langMenu").classList.remove("open"); $("layPanel").classList.remove("open"); $("calPanel").classList.remove("open"); $("bCal").classList.remove("on"); }
+function closePanels() { $("langMenu").classList.remove("open"); $("layPanel").classList.remove("open"); $("calPanel").classList.remove("open"); $("calBtn").classList.remove("on"); }
 
 /* ---------- клавіатура (комп'ютер) ---------- */
 let selIdx = -1;
@@ -1620,20 +1638,22 @@ function stepDay(dir) {
 }
 
 function updateArcUi() {
-  const b = document.getElementById("calBadge");
-  if (viewDate) {
-    document.getElementById("calBadgeK").textContent = T("cal_arch");
-    document.getElementById("calBadgeD").textContent = fmtDayShort(viewDate);
-    document.getElementById("calBadgeLive").textContent = T("cal_live");
-    b.style.display = "flex";
-  } else b.style.display = "none";
+  const bar = document.getElementById("calBar"); if (!bar) return;
+  const cur = viewDate || TODAY(), days = [...arcDays].sort();
+  bar.classList.toggle("arch", !!viewDate);
+  document.getElementById("calCap").textContent = T(viewDate ? "cal_arch" : "cal_live");
+  document.getElementById("calDate").textContent = dparse(cur).toLocaleDateString(I18N[LANG].locale, { day: "2-digit", month: "2-digit" });
+  document.getElementById("calPrev").disabled = !days.some(x => x < cur);
+  document.getElementById("calNext").disabled = !viewDate && !days.some(x => x > cur);
 }
 function calLang() {
-  const bt = document.getElementById("bCal"); bt.title = T("cal"); bt.setAttribute("aria-label", T("cal"));
+  const set = (id, k) => { const el = document.getElementById(id); el.title = T(k); el.setAttribute("aria-label", T(k)); };
+  set("calBtn", "cal"); set("calPrev", "cal_prev"); set("calNext", "cal_next");
   if (viewDate) statusState = ["st_archive", fmtDay(viewDate)];
   updateArcUi(); renderCal();
 }
 function renderCal() {
+  updateArcUi();
   const p = document.getElementById("calPanel"); if (!p || !p.classList.contains("open")) return;
   const loc = I18N[LANG].locale, today = TODAY(), cur = viewDate || today, days = [...arcDays].sort();
   const first = new Date(calY, calM, 1), lead = (first.getDay() + 6) % 7, dim = new Date(calY, calM + 1, 0).getDate();
@@ -1685,7 +1705,7 @@ async function importArc(file) {
   } catch (e) { console.error(e); toastTxt(T("cal_imp_fail")); }
 }
 
-$("bCal").onclick = e => {
+$("calBtn").onclick = e => {
   e.stopPropagation();
   const p = $("calPanel"), open = !p.classList.contains("open");
   closePanels();
@@ -1693,7 +1713,7 @@ $("bCal").onclick = e => {
     if (penOn) setPen(false);
     if (mode) setMode(mode);
     calGoto(viewDate || TODAY());
-    p.classList.add("open"); $("bCal").classList.add("on"); renderCal();
+    p.classList.add("open"); $("calBtn").classList.add("on"); renderCal();
   }
 };
 $("calPanel").addEventListener("click", e => {
@@ -1709,9 +1729,10 @@ $("calPanel").addEventListener("click", e => {
   else if (b.dataset.a === "imp") $("calFile").click();
 });
 $("calFile").onchange = e => { const f = e.target.files[0]; e.target.value = ""; if (f) importArc(f); };
-$("calBadgeLive").onclick = goLive;
-["langBtn", "layBtn", "bPen", "bLine", "bArea"].forEach(id => { const el = $(id); if (el) el.addEventListener("click", () => { $("calPanel").classList.remove("open"); $("bCal").classList.remove("on"); }); });
-L.DomEvent.disableClickPropagation($("calBadge"));
+$("calPrev").onclick = () => stepDay(-1);
+$("calNext").onclick = () => stepDay(1);
+["langBtn", "layBtn", "bPen", "bLine", "bArea"].forEach(id => { const el = $(id); if (el) el.addEventListener("click", () => { $("calPanel").classList.remove("open"); $("calBtn").classList.remove("on"); }); });
+L.DomEvent.disableClickPropagation($("calBar"));
 
 /* ---------- перемикач мови ---------- */
 function applyLang() {
