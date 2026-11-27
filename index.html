@@ -247,10 +247,49 @@
     #calBar .pill { height: 46px; }
     #calPanel { top: 66px; }
   }
+
+
+  /* ======== Лічильник відвідувачів під емблемою ======== */
+  #brand { position: absolute; top: 10px; left: 10px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; pointer-events: none; }
+  #brand > * { pointer-events: auto; }
+  #brand #logo { position: static; }
+  #online { display: none; align-items: center; gap: 7px; height: 26px; padding: 0 11px 0 9px; border: 0; border-radius: 13px; background: #fff; color: var(--ink);
+            font: 700 13px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; box-shadow: 0 2px 10px rgba(0,0,0,.3); cursor: pointer; touch-action: manipulation; }
+  body.vs #online { display: flex; }
+  #online i { width: 9px; height: 9px; border-radius: 50%; background: #1f9d55; box-shadow: 0 0 0 3px rgba(31,157,85,.25); }
+  body.full #online { display: none !important; }
+  body.vs .leaflet-top.leaflet-left { margin-top: 110px; }
+  #statsPanel { display: none; position: fixed; left: 10px; top: 110px; width: min(340px, calc(100vw - 20px)); max-height: calc(100vh - 260px); overflow-y: auto; z-index: 1300;
+                background: #fff; border-radius: 14px; box-shadow: 0 2px 14px rgba(0,0,0,.4); padding: 12px 12px 10px; color: var(--ink); }
+  #statsPanel.open { display: block; }
+  #statsPanel h4 { margin: 0 0 2px; font-size: 16px; }
+  #statsPanel .now { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+  #statsPanel .now b { color: var(--ink); }
+  #statsPanel .row { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 6px; padding: 7px 0; border-top: 1px solid #eee; font-size: 14px; text-align: right; }
+  #statsPanel .row > :first-child { text-align: left; }
+  #statsPanel .row.hd { border-top: 0; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); padding-top: 0; }
+  #statsPanel .row.today { background: #fff1e0; margin: 0 -6px; padding-left: 6px; padding-right: 6px; border-radius: 8px; font-weight: 700; }
+  #statsPanel .note, #statsPanel .msg { margin-top: 8px; font-size: 12px; color: var(--muted); line-height: 1.4; }
+  #statsPanel form { display: flex; gap: 8px; margin-top: 8px; }
+  #statsPanel input { flex: 1; min-width: 0; height: 44px; border: 2px solid var(--line); border-radius: 10px; padding: 0 12px; font: inherit; font-size: 16px; color: var(--ink); background: #fff; }
+  #statsPanel form button { height: 44px; padding: 0 16px; border: 0; border-radius: 10px; background: #111; color: #fff; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; touch-action: manipulation; }
+  #statsPanel .msg.err { color: #b42318; font-size: 13px; }
+  #statsPanel .out { display: block; margin: 10px 0 0 auto; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; text-decoration: underline; cursor: pointer; padding: 6px 0; }
+  body.full #statsPanel { display: none !important; }
+  @media (min-width: 640px) and (orientation: landscape), (min-width: 900px) {
+    body.vs .leaflet-top.leaflet-left { margin-top: 0; }
+    body.vs #dock > #tools { top: 118px; }
+    #statsPanel { left: calc(84px + env(safe-area-inset-left, 0px)); top: 96px; max-height: calc(100vh - 120px); }
+  }
+  @media (min-width: 640px) and (orientation: landscape) and (max-height: 520px) {
+    body.vs #dock > #tools { top: 94px; }
+    #statsPanel { top: 70px; }
+  }
 </style>
 </head>
 <body>
 <div id="map"></div>
+
 
 <div id="tr">
   <div id="lang">
@@ -266,12 +305,16 @@
   </div>
 </div>
 
+<div id="brand">
 <a id="logo" href="https://t.me/AWM_UA_MAP" target="_blank" rel="noopener" title="Telegram: AWM_UA_MAP" aria-label="Telegram: AWM_UA_MAP"><img src="data:image/jpeg;base64,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" alt="AWM — analytic war map"></a>
+<button id="online" type="button" aria-haspopup="true"><i></i><b id="onlineN">–</b></button>
+</div>
 
 <div id="attr"><a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a> · Esri, Maxar · © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>, © CARTO, © <a href="https://openfreemap.org" target="_blank" rel="noopener">OpenFreeMap</a> © <a href="https://www.openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a></div>
 
 <div id="layPanel"></div>
 <div id="calPanel"></div>
+<div id="statsPanel"></div>
 <div id="calBar"><div class="pill">
   <button id="calPrev" class="ar" type="button" aria-label="‹">‹</button>
   <button id="calBtn" class="mid" type="button" aria-haspopup="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg><span><small id="calCap"></small><b id="calDate"></b></span></button>
@@ -346,6 +389,13 @@
    Карта має бути відкрита: «Усі, хто має посилання». Якщо пусто — показується збережена копія.
 */
 const MAP_LINK = "https://www.google.com/maps/d/viewer?mid=12f-mXoGL3b07piqSeRr0-HiRO5mNvkY";
+/* ОДНА адреса вмикає все: спільний щоденний архів для календаря, збереження карти при відкритті сайту та лічильник відвідувачів.
+   Це адреса вашого Cloudflare Worker без «/» в кінці (див. README в awm-archive-worker.zip), наприклад:
+   "https://awm-archive.ВАШ_ПІДДОМЕН.workers.dev"
+   Поки порожньо: календар веде архів лише в браузері, а лічильник онлайн показує «–». */
+const AWM_API = "";
+const ARCHIVE_BASE = AWM_API ? AWM_API + "/archive/" : "";
+const ARCHIVE_PING = AWM_API ? AWM_API + "/snapshot" : "";
 const REFRESH_MINUTES = 5;   // як часто перевіряти оновлення
 // Шари, які увімкнені одразу (за частиною назви). Решту можна ввімкнути кнопкою шарів.
 const DEFAULT_ON = ["основний шар", "спец операції", "міста", "позиції"];
@@ -421,27 +471,36 @@ Object.assign(I18N.ru, {
   pen: "Рисовать", redo: "Вперёд", palette: "Палитра цветов", custom_color: "Свой цвет", fullscreen: "На весь экран", t_free: "Свободная линия", t_rect: "Четырёхугольник", t_circle: "Круг", t_arrow: "Стрелка", t_erase: "Ластик (коснись фигуры)", color: "Цвет", w_thin: "Тонкая", w_mid: "Средняя", w_thick: "Толстая", undo: "Назад", clear_all: "Очистить"
 });
 Object.assign(I18N.uk, {
-  cal: "Календар", cal_arch: "Архів", cal_live: "Наживо", cal_prev: "Раніше", cal_next: "Пізніше", cal_save: "Зберегти зараз", cal_exp: "Експорт", cal_imp: "Імпорт",
+  raions21: "Райони (зразок 2021) — лише окуповані", cal: "Календар", cal_arch: "Архів", cal_live: "Наживо", cal_prev: "Раніше", cal_next: "Пізніше", cal_save: "Зберегти зараз", cal_exp: "Експорт", cal_imp: "Імпорт",
   cal_count: n => "Збережено днів: " + n,
   cal_hint: "Стан карти зберігається автоматично щоразу, коли вона оновлюється з Google. Дні із записом позначені крапкою.",
+  vs_title: "Відвідуваність", vs_online: "Зараз онлайн", vs_day: "День", vs_people: "Люди", vs_opens: "Відкриття", vs_peak: "Пік", vs_none: "Даних ще немає", vs_err: "Не вдалося завантажити статистику", vs_note: "Люди — унікальні пристрої за день; відкриття — скільки разів відкривали карту; пік — найбільше людей одночасно.", vs_tip: "Скільки людей зараз на карті",
+  vs_off: "Лічильник ще не підключено: впиши адресу Worker у рядок AWM_API у файлі.", vs_need: "Статистика доступна лише власнику карти. Введи пароль.", vs_pw: "Пароль", vs_login: "Увійти", vs_logout: "Вийти", vs_wrong: "Невірний пароль", vs_many: "Забагато спроб. Спробуй за 10 хвилин.", vs_locked: "Статистика закрита: на сервері не задано пароль.",
+  cal_shared_fail: "Не вдалося завантажити спільний архів", cal_hint_shared: "Архів спільний для всіх: карта зберігається на сервері автоматично щодня, навіть коли ніхто не заходить.",
   cal_mem: "Сховище браузера недоступне: архів житиме лише поки відкрита сторінка.",
   cal_saved_ok: "Стан карти за сьогодні збережено", cal_save_fail: "Не вдалося зберегти", cal_no_live: "Немає свіжих даних Google для збереження",
   cal_none: "Більше немає збережених днів", cal_open_fail: "Не вдалося відкрити цей день", cal_exp_fail: "Не вдалося створити файл",
   cal_imp_ok: n => "Імпортовано днів: " + n, cal_imp_fail: "Не вдалося прочитати файл", st_archive: d => "Архів · " + d
 });
 Object.assign(I18N.en, {
-  cal: "Calendar", cal_arch: "Archive", cal_live: "Live", cal_prev: "Earlier", cal_next: "Later", cal_save: "Save now", cal_exp: "Export", cal_imp: "Import",
+  raions21: "Districts (2021 layout) — occupied only", cal: "Calendar", cal_arch: "Archive", cal_live: "Live", cal_prev: "Earlier", cal_next: "Later", cal_save: "Save now", cal_exp: "Export", cal_imp: "Import",
   cal_count: n => "Days saved: " + n,
   cal_hint: "The map state is saved automatically each time it updates from Google. Days with a record have a dot.",
+  vs_title: "Visitors", vs_online: "Online now", vs_day: "Day", vs_people: "People", vs_opens: "Opens", vs_peak: "Peak", vs_none: "No data yet", vs_err: "Could not load statistics", vs_note: "People = unique devices per day; opens = times the map was opened; peak = most people at once.", vs_tip: "People on the map right now",
+  vs_off: "The counter is not connected yet: put your Worker address into AWM_API in the file.", vs_need: "Statistics are for the map owner only. Enter the password.", vs_pw: "Password", vs_login: "Sign in", vs_logout: "Sign out", vs_wrong: "Wrong password", vs_many: "Too many attempts. Try again in 10 minutes.", vs_locked: "Statistics are locked: no password is set on the server.",
+  cal_shared_fail: "Could not load the shared archive", cal_hint_shared: "The archive is shared by everyone: the map is saved on the server automatically every day, even when nobody visits.",
   cal_mem: "Browser storage is unavailable: the archive lasts only while this page is open.",
   cal_saved_ok: "Today's map state saved", cal_save_fail: "Could not save", cal_no_live: "No fresh Google data to save",
   cal_none: "No more saved days", cal_open_fail: "Could not open this day", cal_exp_fail: "Could not create the file",
   cal_imp_ok: n => "Days imported: " + n, cal_imp_fail: "Could not read the file", st_archive: d => "Archive · " + d
 });
 Object.assign(I18N.ru, {
-  cal: "Календарь", cal_arch: "Архив", cal_live: "Вживую", cal_prev: "Раньше", cal_next: "Позже", cal_save: "Сохранить сейчас", cal_exp: "Экспорт", cal_imp: "Импорт",
+  raions21: "Районы (образца 2021) — только оккупированные", cal: "Календарь", cal_arch: "Архив", cal_live: "Вживую", cal_prev: "Раньше", cal_next: "Позже", cal_save: "Сохранить сейчас", cal_exp: "Экспорт", cal_imp: "Импорт",
   cal_count: n => "Сохранено дней: " + n,
   cal_hint: "Состояние карты сохраняется автоматически при каждом обновлении из Google. Дни с записью отмечены точкой.",
+  vs_title: "Посещаемость", vs_online: "Сейчас онлайн", vs_day: "День", vs_people: "Люди", vs_opens: "Открытия", vs_peak: "Пик", vs_none: "Данных пока нет", vs_err: "Не удалось загрузить статистику", vs_note: "Люди — уникальные устройства за день; открытия — сколько раз открывали карту; пик — максимум людей одновременно.", vs_tip: "Сколько людей сейчас на карте",
+  vs_off: "Счётчик ещё не подключён: впиши адрес Worker в строку AWM_API в файле.", vs_need: "Статистика доступна только владельцу карты. Введи пароль.", vs_pw: "Пароль", vs_login: "Войти", vs_logout: "Выйти", vs_wrong: "Неверный пароль", vs_many: "Слишком много попыток. Попробуй через 10 минут.", vs_locked: "Статистика закрыта: на сервере не задан пароль.",
+  cal_shared_fail: "Не удалось загрузить общий архив", cal_hint_shared: "Архив общий для всех: карта сохраняется на сервере автоматически каждый день, даже когда никто не заходит.",
   cal_mem: "Хранилище браузера недоступно: архив живёт только пока открыта страница.",
   cal_saved_ok: "Состояние карты за сегодня сохранено", cal_save_fail: "Не удалось сохранить", cal_no_live: "Нет свежих данных Google для сохранения",
   cal_none: "Больше нет сохранённых дней", cal_open_fail: "Не удалось открыть этот день", cal_exp_fail: "Не удалось создать файл",
@@ -595,18 +654,19 @@ const LabelsLayer = L.Layer.extend({
 });
 const labelsLayer = new LabelsLayer();                         // за бажанням: назви мовою інтерфейсу (вмикається в меню шарів)
 
-/* ---------- Кордони районів окупованих областей (райони зразка 2020 року) ----------
+/* ---------- Райони зразка 2021 року — лише на окупованих територіях ----------
+   Райони, що діяли після реформи 2020 року (Крим, Херсонська, Запорізька, Донецька, Луганська та прифронтові райони Харківської, Сумської, Дніпропетровської, Миколаївської областей). 
    Лінії кордонів беруться з OpenStreetMap (адмінрівень 6), а малюються ЛИШЕ всередині окупованої зони з твоєї карти:
    темно-червоні й фіолетові полігони шару «Основний шар мапи» вважаються окупованими, зелені (звільнені) — вирізаються.
    Де окупація закінчується — кордони районів не малюються. Зона береться з поточних даних карти, тож рухається разом із фронтом. */
-const RAION_NAMES = "Бериславський|Генічеський|Каховський|Скадовський|Херсонський|Бердянський|Василівський|Запорізький|Мелітопольський|Пологівський|Алчевський|Довжанський|Луганський|Ровеньківський|Щастинський|Старобільський|Сєвєродонецький|Сватівський|Бахмутський|Волноваський|Горлівський|Донецький|Кальміуський|Краматорський|Маріупольський|Покровський";
-const RAION_BBOX = "45.8,32.5,49.9,40.4";                      // південь, захід, північ, схід — Херсонська, Запорізька, Донецька, Луганська області
+const RAION_NAMES = "Бериславський|Генічеський|Каховський|Скадовський|Херсонський|Бердянський|Василівський|Запорізький|Мелітопольський|Пологівський|Алчевський|Довжанський|Луганський|Ровеньківський|Щастинський|Старобільський|Сєвєродонецький|Сватівський|Бахмутський|Волноваський|Горлівський|Донецький|Кальміуський|Краматорський|Маріупольський|Покровський|Бахчисарайський|Білогірський|Джанкойський|Кіровський|Красногвардійський|Красноперекопський|Ленінський|Нижньогірський|Первомайський|Роздольненський|Сакський|Сімферопольський|Совєтський|Чорноморський|Ізюмський|Куп.янський|Чугуївський|Харківський|Лозівський|Богодухівський|Сумський|Охтирський|Шосткинський|Конотопський|Синельниківський|Павлоградський|Дніпровський|Криворізький|Баштанський|Вознесенський|Миколаївський";
+const RAION_BBOX = "44.3,32.0,51.7,40.4";                      // південь, захід, північ, схід — Херсонська, Запорізька, Донецька, Луганська області
 const RAION_QUERY = '[out:json][timeout:120];(' +
   'rel["boundary"="administrative"]["admin_level"="6"]["name:uk"~"^(' + RAION_NAMES + ") район$\"](" + RAION_BBOX + ");" +
   'rel["boundary"="administrative"]["admin_level"="6"]["name"~"^(' + RAION_NAMES + ") район$\"](" + RAION_BBOX + ");" +
   ");out skel geom;";
 const OVERPASS_URLS = ["https://overpass-api.de/api/interpreter", "https://overpass.kumi.systems/api/interpreter", "https://overpass.private.coffee/api/interpreter"];
-const RAION_KEY = "awm_raions_v1";
+const RAION_KEY = "awm_raions2021_v1";
 const OCC_COLORS = ["#a52714", "#880e4f"];                    // окупована територія: темно-червона та фіолетова зони карти
 const LIB_COLORS = ["#097138"];                               // звільнені ділянки (зелені) — з окупованої зони вирізаються
 
@@ -680,10 +740,13 @@ function drawRaionLayer(ctx, off, W, H, dpr, occ, lib, lines, view, style) {
   octx.globalCompositeOperation = "source-in";
   octx.strokeStyle = style.color; octx.lineWidth = style.width; octx.lineJoin = "round"; octx.lineCap = "round";
   octx.beginPath();
+  let n = 0;
   lines.forEach(l => {
     if (!hit(l.bbox)) return;
+    n++;
     l.pts.forEach((pt, i) => { const x = X(pt[1]) - ox, y = Y(pt[0]) - oy; i ? octx.lineTo(x, y) : octx.moveTo(x, y); });
   });
+  if (!n) return;            // у кадрі немає жодної лінії: порожній stroke() не очищає маску, і вона лишалась би чорною заливкою — нічого не малюємо
   octx.stroke();
   octx.globalCompositeOperation = "source-over";
   if (style.halo) { ctx.shadowColor = "rgba(255,255,255,0.85)"; ctx.shadowBlur = 3 * dpr; }      // світлий контур, щоб лінія читалась на червоному тлі
@@ -695,49 +758,6 @@ function polyBox(rings) {
   return [a, b, c, d];
 }
 
-/* ---------- Кордони громад (територіальних громад) — густа сітка, як на скріншоті Google Мої карти ----------
-   Усі межі громад (вони включають і межі районів). Overpass віддає лише номери відношень (кілька КБ),
-   а геометрію з уже спрощеними контурами беремо з Nominatim lookup пачками по 50 — це в десятки разів легше за повні дані. */
-const HROMADY_KEY = "awm_hromady_v1";
-const HROMADY_AREA_QUERY = '[out:json][timeout:90];(area["ISO3166-2"="UA-65"];area["ISO3166-2"="UA-23"];area["ISO3166-2"="UA-09"];area["ISO3166-2"="UA-14"];)->.a;rel(area.a)["boundary"="administrative"]["admin_level"="7"];out ids;';
-const HROMADY_BBOX_QUERY = '[out:json][timeout:90];rel["boundary"="administrative"]["admin_level"="7"](' + RAION_BBOX + ");out ids;";
-function geoToLines(geo) {
-  const out = [];
-  const addRings = rings => (rings || []).forEach(r => { const pts = r.map(c => [+c[1].toFixed(4), +c[0].toFixed(4)]); if (pts.length > 1) out.push(pts); });
-  if (!geo) return out;
-  if (geo.type === "Polygon") addRings(geo.coordinates);
-  else if (geo.type === "MultiPolygon") (geo.coordinates || []).forEach(addRings);
-  return out;
-}
-async function overpassIds(query) {
-  for (const url of OVERPASS_URLS) {
-    try {
-      const r = await fetch(url, { method: "POST", body: "data=" + encodeURIComponent(query), headers: { "Content-Type": "application/x-www-form-urlencoded" } });
-      if (!r.ok) continue;
-      const ids = ((await r.json()).elements || []).filter(e => e.type === "relation").map(e => e.id);
-      if (ids.length) return ids;
-    } catch (e) { /* наступний сервер */ }
-  }
-  return [];
-}
-async function loadHromady(onBatch, pauseMs) {
-  try { const c = JSON.parse(localStorage.getItem(HROMADY_KEY) || "null"); if (c && c.lines && c.lines.length) { onBatch(c.lines); return true; } } catch (e) { /* немає кешу */ }
-  let ids = await overpassIds(HROMADY_AREA_QUERY);
-  if (ids.length < 20) ids = await overpassIds(HROMADY_BBOX_QUERY);          // запасний запит, якщо за областями нічого не знайшло
-  if (!ids.length) return false;
-  const all = [];
-  for (let i = 0; i < ids.length; i += 50) {
-    const batch = ids.slice(i, i + 50).map(id => "R" + id).join(",");
-    try {
-      const r = await fetch("https://nominatim.openstreetmap.org/lookup?format=jsonv2&polygon_geojson=1&polygon_threshold=0.0006&osm_ids=" + batch);
-      if (r.ok) { const lines = (await r.json()).flatMap(x => geoToLines(x.geojson)); all.push(...lines); onBatch(lines); }
-    } catch (e) { /* пропускаємо пачку */ }
-    if (i + 50 < ids.length) await new Promise(res => setTimeout(res, pauseMs === undefined ? 1100 : pauseMs));   // ввічлива пауза для Nominatim
-  }
-  if (all.length < 20) return false;
-  try { localStorage.setItem(HROMADY_KEY, JSON.stringify({ t: Date.now(), lines: all })); } catch (e) { /* кеш завеликий — не страшно */ }
-  return true;
-}
 map.createPane("raions"); map.getPane("raions").style.zIndex = 420; map.getPane("raions").style.pointerEvents = "none";
 const RaionLayer = L.Layer.extend({
   initialize(opts) { this._opts = opts; this._occ = []; this._lib = []; this._lines = null; this._loading = false; },
@@ -791,17 +811,15 @@ const RaionLayer = L.Layer.extend({
     drawRaionLayer(cv.getContext("2d"), this._off, sz.x, sz.y, dpr, this._occ, this._lib, this._lines, { lat: c.lat, lng: c.lng, zoom: z, bounds: [b.getSouth(), b.getWest(), b.getNorth(), b.getEast()] }, this._opts.style);
   }
 });
-/* Великі райони (26, зразок 2020) — окремий, за замовчуванням вимкнений шар */
-const raionLayer = new RaionLayer({ style: { color: "#8b0a0a", width: 2.2, halo: true }, loader: async add => { const lines = await loadRaions(); if (lines) add(lines); return !!lines; } });
-/* Густа сітка меж громад і районів, як на скріншоті — увімкнена одразу */
-const gromadyLayer = new RaionLayer({ style: { color: "#7a1d12", width: 1.3, halo: false }, loader: add => loadHromady(add) });
-gromadyLayer.addTo(map);
+/* Райони зразка 2021 року — малюються лише всередині окупованої зони (мінус звільнені ділянки), увімкнені одразу */
+const raions21Layer = new RaionLayer({ style: { color: "#8b0a0a", width: 2, halo: true }, loader: async add => { const lines = await loadRaions(); if (lines) add(lines); return !!lines; } });
+raions21Layer.addTo(map);
 
 const folderLayers = new Map();   // назва групи -> L.featureGroup
 /* ---------- Шари: власна кнопка та панель (не залежать від картинок Leaflet) ---------- */
 const layBases = [["b_road", baseLayers.road], ["b_osm", baseLayers.osm], ["b_sat", baseLayers.sat], ["b_dark", baseLayers.dark]];
 function layOverlays() {
-  const rows = [["borders", borders], ["gromady", gromadyLayer], ["raions", raionLayer], ["names_beta", labelsLayer]].map(([k, l]) => ({ label: T(k), layer: l }));
+  const rows = [["borders", borders], ["raions21", raions21Layer], ["names_beta", labelsLayer]].map(([k, l]) => ({ label: T(k), layer: l }));
   folderLayers.forEach((fg, name) => rows.push({ label: folderLabel(name), layer: fg }));
   return rows;
 }
@@ -1010,7 +1028,7 @@ function render(groups) {
     if (wasOn && !map.hasLayer(fg)) fg.addTo(map);
   });
   folderLayers.forEach((fg, name) => { if (!seen.has(name)) { map.removeLayer(fg); folderLayers.delete(name); refreshLayPanel(); searchIdx.delete(name); } });
-  raionLayer.setZone(groups); gromadyLayer.setZone(groups);                                    // кордони районів лише в межах окупованої зони цього стану карти
+  raions21Layer.setZone(groups);                                                                 // кордони районів лише в межах окупованої зони цього стану карти
   firstRender = false;
 }
 
@@ -1052,8 +1070,11 @@ async function refresh(manual) {
   if (live) {
     const sig = live.length + ":" + live.slice(-200);
     liveText = live; liveHm = hhmm();
-    const dk = dkey(new Date());
-    if (sig !== arcSig || dk !== arcDayKey) { arcSig = sig; arcDayKey = dk; archiveSave(live); }   // стан карти — у щоденний архів
+    const dk = TODAY();
+    if (sig !== arcSig || dk !== arcDayKey) {
+      arcSig = sig; arcDayKey = dk; archiveSave(live);
+      if (SHARED && ARCHIVE_PING) fetch(ARCHIVE_PING, { method: "POST", keepalive: true }).then(() => setTimeout(arcLoadIndex, 5000)).catch(() => {});   // просимо сервер зберегти цей стан для всіх
+    }   // стан карти — у щоденний архів
     if (!viewDate) {
       if (sig !== lastSig || manual) { try { render(parseKml(live)); lastSig = sig; } catch (e) { console.error(e); } }
       setSt("st_ok", liveHm);
@@ -1495,7 +1516,7 @@ L.DomEvent.disableScrollPropagation(resEl);
 
 
 
-function closePanels() { $("langMenu").classList.remove("open"); $("layPanel").classList.remove("open"); $("calPanel").classList.remove("open"); $("calBtn").classList.remove("on"); }
+function closePanels() { $("langMenu").classList.remove("open"); $("layPanel").classList.remove("open"); $("calPanel").classList.remove("open"); $("statsPanel").classList.remove("open"); $("calBtn").classList.remove("on"); }
 
 /* ---------- клавіатура (комп'ютер) ---------- */
 let selIdx = -1;
@@ -1551,7 +1572,7 @@ const dkey = d => d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.
 const dparse = k => { const [y, m, d] = k.split("-").map(Number); return new Date(y, m - 1, d); };
 const fmtDay = k => dparse(k).toLocaleDateString(I18N[LANG].locale, { day: "numeric", month: "long", year: "numeric" });
 const fmtDayShort = k => dparse(k).toLocaleDateString(I18N[LANG].locale, { day: "2-digit", month: "2-digit", year: "numeric" });
-const TODAY = () => dkey(new Date());
+const TODAY = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Kyiv" });   // YYYY-MM-DD за Києвом
 
 const ARC = (() => {
   const mem = new Map(); let dbp = null;
@@ -1598,10 +1619,23 @@ function toastTxt(s) {
 
 const arcDays = new Set();
 let arcMemOnly = false, calY = new Date().getFullYear(), calM = new Date().getMonth();
-ARC.keys().then(ks => { (ks || []).forEach(k => arcDays.add(k)); renderCal(); }).catch(() => {});
-ARC.persistent().then(ok => { if (!ok) { arcMemOnly = true; renderCal(); } });
+const SHARED = !!ARCHIVE_BASE;          // true: архів спільний, лежить на сервері; false: лише локально в браузері
+let arcSharedErr = false;
+async function arcLoadIndex() {
+  if (!SHARED) { try { ((await ARC.keys()) || []).forEach(k => arcDays.add(k)); } catch (e) { /* порожньо */ } renderCal(); return; }
+  try {
+    const r = await fetch(ARCHIVE_BASE + "index.json?_=" + Math.floor(Date.now() / 60000), { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const j = await r.json(); arcSharedErr = false;
+    (j.days || []).forEach(k => { if (/^\d{4}-\d{2}-\d{2}$/.test(k)) arcDays.add(k); });
+  } catch (e) { console.error(e); arcSharedErr = true; }
+  renderCal();
+}
+arcLoadIndex();
+if (!SHARED) ARC.persistent().then(ok => { if (!ok) { arcMemOnly = true; renderCal(); } });
 
 async function archiveSave(text, manual) {
+  if (SHARED) return;                       // у спільному режимі карту щодня зберігає сервер, а не браузер
   const d = TODAY();
   try {
     const g = await gzText(text);
@@ -1611,10 +1645,17 @@ async function archiveSave(text, manual) {
   } catch (e) { console.error(e); if (manual) toastTxt(T("cal_save_fail")); }
 }
 function calGoto(k) { const d = dparse(k); calY = d.getFullYear(); calM = d.getMonth(); }
+async function arcText(k) {
+  if (!SHARED) { const rec = await ARC.get(k); if (!rec) throw new Error("немає запису"); return await ungzRec(rec); }
+  const r = await fetch(ARCHIVE_BASE + k + ".kml.gz");
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const buf = await r.arrayBuffer(), u = new Uint8Array(buf);
+  if (u[0] === 0x1f && u[1] === 0x8b) return await ungzRec({ z: 1, b: buf });     // gzip-файл
+  return new TextDecoder().decode(buf);                                            // сервер уже віддав розпакований KML
+}
 async function openDay(k) {
   try {
-    const rec = await ARC.get(k); if (!rec) return;
-    const groups = parseKml(await ungzRec(rec));
+    const groups = parseKml(await arcText(k));
     learnIcons(groups); map.closePopup(); render(groups);
     viewDate = k; calGoto(k); setSt("st_archive", fmtDay(k)); updateArcUi(); renderCal();
   } catch (e) { console.error(e); toastTxt(T("cal_open_fail")); }
@@ -1650,6 +1691,7 @@ function calLang() {
   const set = (id, k) => { const el = document.getElementById(id); el.title = T(k); el.setAttribute("aria-label", T(k)); };
   set("calBtn", "cal"); set("calPrev", "cal_prev"); set("calNext", "cal_next");
   if (viewDate) statusState = ["st_archive", fmtDay(viewDate)];
+  { const o = document.getElementById("online"); o.title = T("vs_tip"); o.setAttribute("aria-label", T("vs_tip")); }
   updateArcUi(); renderCal();
 }
 function renderCal() {
@@ -1670,8 +1712,8 @@ function renderCal() {
   const noPrev = !days.some(x => x < cur), noNext = !viewDate && !days.some(x => x > cur);
   h += '<div class="ca"><button type="button" data-a="prev"' + (noPrev ? " disabled" : "") + ">‹ " + esc(T("cal_prev")) + '</button><button type="button" class="live" data-a="live">' + esc(T("cal_live")) +
        '</button><button type="button" data-a="next"' + (noNext ? " disabled" : "") + ">" + esc(T("cal_next")) + " ›</button></div>";
-  h += '<div class="cl"><button type="button" data-a="save">' + esc(T("cal_save")) + '</button><button type="button" data-a="exp">' + esc(T("cal_exp")) + '</button><button type="button" data-a="imp">' + esc(T("cal_imp")) + "</button></div>";
-  h += '<div class="cf">' + esc(T("cal_count", arcDays.size)) + (arcDays.size < 2 ? "<br>" + esc(T("cal_hint")) : "") + (arcMemOnly ? "<br>" + esc(T("cal_mem")) : "") + "</div>";
+  if (!SHARED) h += '<div class="cl"><button type="button" data-a="save">' + esc(T("cal_save")) + '</button><button type="button" data-a="exp">' + esc(T("cal_exp")) + '</button><button type="button" data-a="imp">' + esc(T("cal_imp")) + "</button></div>";
+  h += '<div class="cf">' + esc(T("cal_count", arcDays.size)) + (SHARED ? (arcSharedErr ? "<br>" + esc(T("cal_shared_fail")) : (arcDays.size < 2 ? "<br>" + esc(T("cal_hint_shared")) : "")) : (arcDays.size < 2 ? "<br>" + esc(T("cal_hint")) : "") + (arcMemOnly ? "<br>" + esc(T("cal_mem")) : "")) + "</div>";
   p.innerHTML = h;
 }
 async function saveNow() {
@@ -1714,6 +1756,7 @@ $("calBtn").onclick = e => {
     if (mode) setMode(mode);
     calGoto(viewDate || TODAY());
     p.classList.add("open"); $("calBtn").classList.add("on"); renderCal();
+    if (SHARED) arcLoadIndex();            // підтягуємо нові дні архіву
   }
 };
 $("calPanel").addEventListener("click", e => {
@@ -1733,6 +1776,74 @@ $("calPrev").onclick = () => stepDay(-1);
 $("calNext").onclick = () => stepDay(1);
 ["langBtn", "layBtn", "bPen", "bLine", "bArea"].forEach(id => { const el = $(id); if (el) el.addEventListener("click", () => { $("calPanel").classList.remove("open"); $("calBtn").classList.remove("on"); }); });
 L.DomEvent.disableClickPropagation($("calBar"));
+
+/* ---------- ВІДВІДУВАНІСТЬ: «онлайн зараз» під емблемою і статистика по днях (лише з паролем) ----------
+   Сайт раз на ~30 с, поки вкладка відкрита, надсилає Worker-у анонімний випадковий ідентифікатор пристрою; ні імен, ні IP не передається.
+   Число «онлайн» бачать усі. Статистику по днях Worker віддає тільки за паролем власника (змінна STATS_PASSWORD у Cloudflare):
+   пароль перевіряється на сервері, у цьому файлі його немає. */
+const STATS_API = AWM_API;
+const vsRid = () => { const a = new Uint8Array(12); crypto.getRandomValues(a); return [...a].map(x => x.toString(16).padStart(2, "0")).join(""); };
+const vsSid = vsRid();                                       // ідентифікатор цієї вкладки
+let vsVid = "", vsFirst = true, vsOnline = null;
+try { vsVid = localStorage.getItem("awm_vid") || ""; if (!vsVid) { vsVid = vsRid(); localStorage.setItem("awm_vid", vsVid); } } catch (e) { vsVid = vsSid; }
+function vsShow() { document.getElementById("onlineN").textContent = vsOnline == null ? "–" : vsOnline; }
+async function vsPing() {
+  if (!STATS_API || document.hidden) return;
+  try {
+    const r = await fetch(STATS_API + "/hit?sid=" + vsSid + "&vid=" + vsVid + (vsFirst ? "&first=1" : ""), { method: "POST", keepalive: true });
+    const j = await r.json(); if (j.error) throw new Error(j.error);
+    vsFirst = false; vsOnline = j.online;
+  } catch (e) { vsOnline = null; }
+  vsShow();
+}
+const vsKey = () => { try { return localStorage.getItem("awm_statskey") || ""; } catch (e) { return ""; } };
+const vsHead = () => "<h4>" + esc(T("vs_title")) + "</h4>";
+function vsLogin(msg) {                                       // запит пароля
+  const p = $("statsPanel");
+  p.innerHTML = vsHead() + '<div class="now">' + esc(T("vs_need")) + '</div><form id="vsForm"><input id="vsPw" type="password" autocomplete="current-password" placeholder="' + esc(T("vs_pw")) +
+    '"><button type="submit">' + esc(T("vs_login")) + "</button></form>" + (msg ? '<div class="msg err">' + esc(msg) + "</div>" : "");
+  $("vsForm").onsubmit = e => { e.preventDefault(); const v = $("vsPw").value.trim(); if (v) vsPanel(v); };
+  setTimeout(() => { const i = $("vsPw"); if (i && !msg) i.focus(); }, 50);
+}
+async function vsPanel(typed) {
+  const p = $("statsPanel"), today = TODAY();
+  if (!STATS_API) { p.innerHTML = vsHead() + '<div class="msg">' + esc(T("vs_off")) + "</div>"; return; }
+  const key = typed !== undefined ? typed : vsKey();
+  if (!key) { vsLogin(); return; }
+  p.innerHTML = vsHead() + '<div class="msg">…</div>';
+  try {
+    const r = await fetch(STATS_API + "/stats", { method: "POST", headers: { "Content-Type": "text/plain" }, body: key });
+    if (r.status === 401 || r.status === 403 || r.status === 429) {
+      try { localStorage.removeItem("awm_statskey"); } catch (e) { /* не страшно */ }
+      vsLogin(r.status === 429 ? T("vs_many") : r.status === 403 ? T("vs_locked") : (typed !== undefined ? T("vs_wrong") : ""));
+      return;
+    }
+    const j = await r.json(); if (j.error) throw new Error(j.error);
+    if (typed !== undefined) { try { localStorage.setItem("awm_statskey", typed); } catch (e) { /* не страшно */ } }
+    vsOnline = j.online; vsShow();
+    let h = vsHead() + '<div class="now">' + esc(T("vs_online")) + ": <b>" + (j.online == null ? "–" : j.online) + "</b></div>";
+    if (!j.days.length) h += '<div class="msg">' + esc(T("vs_none")) + "</div>";
+    else {
+      h += '<div class="row hd"><span>' + esc(T("vs_day")) + "</span><span>" + esc(T("vs_people")) + "</span><span>" + esc(T("vs_opens")) + "</span><span>" + esc(T("vs_peak")) + "</span></div>";
+      j.days.forEach(d => { h += '<div class="row' + (d.day === today ? " today" : "") + '"><span>' + esc(fmtDayShort(d.day)) + "</span><span>" + d.visitors + "</span><span>" + d.views + "</span><span>" + d.peak + "</span></div>"; });
+    }
+    p.innerHTML = h + '<div class="note">' + esc(T("vs_note")) + '</div><button type="button" class="out" id="vsOut">' + esc(T("vs_logout")) + "</button>";
+    $("vsOut").onclick = () => { try { localStorage.removeItem("awm_statskey"); } catch (e) { /* не страшно */ } vsLogin(); };
+  } catch (e) { console.error(e); p.innerHTML = vsHead() + '<div class="msg">' + esc(T("vs_err")) + "</div>"; }
+}
+document.body.classList.add("vs");                            // позначка видима завжди; без Worker показує «–»
+$("online").onclick = e => {
+  e.stopPropagation();
+  const p = $("statsPanel"), open = !p.classList.contains("open");
+  closePanels();
+  if (open) { if (penOn) setPen(false); if (mode) setMode(mode); p.classList.add("open"); vsPanel(); }
+};
+$("statsPanel").addEventListener("click", e => e.stopPropagation());
+["langBtn", "layBtn", "calBtn", "bPen", "bLine", "bArea"].forEach(id => { const el = $(id); if (el) el.addEventListener("click", () => $("statsPanel").classList.remove("open")); });
+if (STATS_API) {
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) vsPing(); });
+  vsPing(); setInterval(vsPing, 30000);
+}
 
 /* ---------- перемикач мови ---------- */
 function applyLang() {
